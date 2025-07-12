@@ -138,6 +138,36 @@ class FileSystem:
         entries[fname] = inode_idx
         dir.update_entries(entries)
 
+    def move(self, path):
+        if len(path) < 2:
+            print("mv: Not enough arguments")
+            return
+
+        name, new_dir_name = path[0], " ".join(path[1:])
+
+        if "/" not in name:
+            dir = self.current_dir
+            fname = name
+        else:
+            p = name.rpartition("/")
+            dir = self.get_dir(p[0])
+            if dir is None:
+                return
+            fname = p[-1]
+
+        new_dir = self.get_dir(new_dir_name)
+        if new_dir is None:
+            return
+
+        entries = dir.get_entries()
+        new_entries = new_dir.get_entries()
+        if fname not in entries:
+            print(f"mv: '{fname}' not founded")
+            return
+        new_entries[fname] = entries.pop(fname)
+        new_dir.update_entries(new_entries)
+        dir.update_entries(entries)
+
     def remove_file(self, path):
         if not path:
             print("rm: Not enough arguments")
@@ -160,9 +190,9 @@ class FileSystem:
             inode_idx = entries.pop(fname)
             self.free_inodes.add(inode_idx)
             self.inodes[inode_idx].reset()
-            dir.update_entries(entries)
+            dir.update_entries(entries)            
 
-    def cat(self, path):
+    def _cat(self, path):
         p = path[0].rpartition("/")
         dir = self.get_dir(p[0])
         if dir is None:
@@ -173,7 +203,12 @@ class FileSystem:
             return
         inode_idx = entries[p[-1]]
         data = self.inodes[inode_idx].get_data(self)
-        print(data.decode("utf-8"))
+        return data.decode("utf-8")
+
+    def cat(self, path):
+        data = self._cat(path)
+        if data:
+            print(data)
 
     def list_directory(self, path=None):
         dir = self.current_dir if not path else self.get_dir(path[0])

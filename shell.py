@@ -14,6 +14,7 @@ class Shell:
             "exit": self.exit_,
             "cat": self.fs.cat,
             "clear": self.clear,
+            "mv": self.fs.move,
         }
 
     def start(self):
