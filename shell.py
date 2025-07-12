@@ -1,8 +1,9 @@
 import os
 from filesystem import FileSystem
+from linkedfilesystem import LinkedFileSystem
 
 class Shell:
-    def __init__(self, fs: FileSystem) -> None:
+    def __init__(self, fs: FileSystem | LinkedFileSystem) -> None:
         self.fs = fs
         self.commands = {
             "ls": self.fs.list_directory,
